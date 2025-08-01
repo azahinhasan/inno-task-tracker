@@ -6,7 +6,8 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,SetMetadata
+  UseGuards,
+  SetMetadata,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto, UpdateTaskStatusDto } from './task.dto';
@@ -42,7 +43,6 @@ export class TasksController {
       limit,
     });
   }
-
 
   @SetMetadata('roles', ['ADMIN'])
   @Patch(':id/status')
