@@ -9,12 +9,16 @@ import { Model } from 'mongoose';
 import { Task, TaskStatus } from './schemas/task.schema';
 import { CreateTaskDto } from './task.dto';
 import { LoggingsService } from '../logging/logging.service';
+import { Inject } from '@nestjs/common/decorators/core';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class TasksService {
   constructor(
     @InjectModel(Task.name) private taskModel: Model<Task>,
     private readonly logsService: LoggingsService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async createTask(dto: CreateTaskDto, userId: string) {
@@ -30,12 +34,15 @@ export class TasksService {
         );
       }
 
-      const task = await this.taskModel.create([{ ...dto, createdBy: userId }], { session });
+      const task = await this.taskModel.create(
+        [{ ...dto, createdBy: userId }],
+        { session },
+      );
 
       await this.logsService.create('CREATE_TASK', 'SUCCESS', userId);
       await session.commitTransaction();
       session.endSession();
-
+      await this.cacheManager.del('listTasksCache');
       return task[0];
     } catch (error) {
       await session.abortTransaction();
@@ -56,8 +63,16 @@ export class TasksService {
     limit?: number;
     userId: string;
   }) {
-    const { status, dueFrom, dueTo, search, page = 1, limit = 10, userId } = query;
-    const filter: any = { createdBy: userId };
+    const {
+      status,
+      dueFrom,
+      dueTo,
+      search,
+      page = 1,
+      limit = 10,
+      userId,
+    } = query;
+    const filter: any = {};
 
     if (status) {
       filter.status = status;

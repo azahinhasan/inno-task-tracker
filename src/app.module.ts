@@ -7,8 +7,9 @@ import { TasksModule } from './tasks/tasks.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import * as dotenv from 'dotenv';
 import { APP_GUARD } from '@nestjs/core';
+import { CacheModule } from '@nestjs/cache-manager';
+import * as dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -24,6 +25,10 @@ dotenv.config();
         limit: 10,
       },
     ]),
+    CacheModule.register({
+      ttl: 6000, 
+      isGlobal: true,
+    }),
     HealthModule,
     AuthModule,
     TasksModule,
