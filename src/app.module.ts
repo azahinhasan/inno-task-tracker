@@ -11,8 +11,13 @@ dotenv.config();
 
 @Module({
   imports: [
-    MongooseModule.forRoot(process.env.MONGO_URI || 'mongodb://mongo:27017/inno-task-tracker'),
-    HealthModule, AuthModule, TasksModule],
+    MongooseModule.forRoot(
+      process.env.MONGO_URI || 'mongodb://mongo:27017/inno-task-tracker',
+    ),
+    HealthModule,
+    AuthModule,
+    TasksModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
