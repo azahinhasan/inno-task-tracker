@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
+import { IsEmail, IsIn, IsNotEmpty, MinLength, IsOptional } from 'class-validator';
 
 export class SignupDto {
   @IsEmail()
@@ -7,4 +7,8 @@ export class SignupDto {
   @IsNotEmpty()
   @MinLength(6)
   password: string;
+
+  @IsOptional()
+  @IsIn(['ADMIN', 'USER'], { message: 'Role must be either ADMIN or USER' })
+  role?: string;
 }
