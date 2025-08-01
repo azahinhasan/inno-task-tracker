@@ -12,8 +12,9 @@ import {
 import { TasksService } from './tasks.service';
 import { CreateTaskDto, UpdateTaskStatusDto } from './task.dto';
 import { TaskStatus } from './schemas/task.schema';
-import { JwtAuthGuard } from '../guard/jwt-auth.guard';
-import { RolesGuard } from '../guard/roles-guard';
+import { JwtAuthGuard } from '../common/guard/jwt-auth.guard';
+import { RolesGuard } from '../common/guard/roles-guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';  // import decorator
 
 @Controller('tasks')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -21,8 +22,8 @@ export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Post()
-  create(@Body() dto: CreateTaskDto) {
-    return this.tasksService.createTask(dto);
+  create(@Body() dto: CreateTaskDto, @CurrentUser() user: any) {
+    return this.tasksService.createTask(dto, user.userId);
   }
 
   @Get()
@@ -33,6 +34,7 @@ export class TasksController {
     @Query('search') search?: string,
     @Query('page') page?: number,
     @Query('limit') limit?: number,
+    @CurrentUser() user?: any,
   ) {
     return this.tasksService.listTasks({
       status,
@@ -41,12 +43,17 @@ export class TasksController {
       search,
       page,
       limit,
+      userId: user.userId,
     });
   }
 
   @SetMetadata('roles', ['ADMIN'])
   @Patch(':id/status')
-  update(@Param('id') id: string, @Body() dto: UpdateTaskStatusDto) {
-    return this.tasksService.updateTaskStatus(id, dto.status);
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateTaskStatusDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.tasksService.updateTaskStatus(id, dto.status, user.userId);
   }
 }
